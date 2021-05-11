@@ -24,6 +24,7 @@ const necessaryImg = modalLightbox.querySelector('.lightbox__image');
 const cardsMarkup = createGalleryCardsMarkup(resources);
 galleryContainer.insertAdjacentHTML('beforeend', cardsMarkup);
 
+
 function createGalleryCardsMarkup(resources) {
     return resources
         .map(res => {
@@ -53,14 +54,10 @@ function onGalleryContainerClick(evt) {
 
     imgAttributesChanging(currentSlide)
 
-    if (!modalLightbox.classList.contains('is-open')) {
-        modalLightbox.classList.add('is-open');
-    }
-
-    if (modalLightbox.classList.contains('is-open')) {
-        window.addEventListener('keydown', onChangingImgKeyPress);
-    };
-
+     if (!modalLightbox.classList.contains('is-open')) {
+         modalLightbox.classList.add('is-open');
+         window.addEventListener('keydown', onChangingImgKeyPress);
+     }
     closeModalBtn.addEventListener('click', onCloseModal);
     lightboxOverlay.addEventListener('click', onCloseModal)
     window.addEventListener('keydown', onEscKeyPress);
@@ -104,14 +101,14 @@ function onChangingImgKeyPress(event) {
 function showPrevImg() {
     if (currentSlide.dataset.index > 0) {
         currentSlide = slides[Number(currentSlide.dataset.index) - 1];
-    } else { currentSlide = slides[8]; }
+    } else { currentSlide = slides.length; }
     necessaryImg.src = currentSlide.dataset.source;
     necessaryImg.alt = currentSlide.alt;
     console.log(currentSlide);
     console.log(`Текущий слайд № ${currentSlide.dataset.index}`);
 };
 function showNextImg() {
-    if (currentSlide.dataset.index < 8) {
+    if (currentSlide.dataset.index < length) {
         currentSlide = slides[Number(currentSlide.dataset.index) + 1];
     } else { currentSlide = slides[0]; }
     necessaryImg.src = currentSlide.dataset.source;
