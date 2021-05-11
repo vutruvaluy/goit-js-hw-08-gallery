@@ -8,11 +8,11 @@
 // 5 Закрытие модального окна по клику на кнопку button[data-action="close-lightbox"]. Очистка значения атрибута
 // src элемента img.lightbox**image. Это необходимо для того, чтобы при следующем
 // открытии модального окна, пока грузится изображение, мы не видели предыдущее.
-const containerGallery = document.querySelector('.js-gallery');
+const galleryContainer = document.querySelector('.js-gallery');
 const overlay = document.querySelector('.lightbox__overlay');
-const lightbox = document.querySelector('.js-lightbox');
-const closeBtn = document.querySelector('[data-action="close-lightbox"]');
-const imgModul = document.querySelector('.lightbox__image');
+const lightboxOverlay = document.querySelector('.js-lightbox');
+const closeModalBtn = document.querySelector('[data-action="close-lightbox"]');
+const necessaryImg = document.querySelector('.lightbox__image');
 
 
 function createMarkUp(files) {
@@ -33,8 +33,8 @@ function createMarkUp(files) {
     }).join('');
 };
 
-containerGallery.insertAdjacentHTML('beforeend', createMarkUp(files));
-containerGallery.addEventListener('click', onCreateGalleryClick);
+galleryContainer.insertAdjacentHTML('beforeend', createMarkUp(files));
+galleryContainer.addEventListener('click', onCreateGalleryClick);
 
 function onCreateGalleryClick(ev) {
     if (!ev.target.classList.contains('gallery__image')) {
@@ -46,22 +46,22 @@ function onCreateGalleryClick(ev) {
     const elCurrent = ev.currentTarget;
     onOpenLightbox(el);
     window.addEventListener('keydown', onEscPress);
-    console.log(lightbox);
+    console.log(lightboxOverlay);
 }
 
 function onOpenLightbox(el) {
-    lightbox.classList.add('is-open');
+    lightboxOverlay.classList.add('is-open');
     overlay.addEventListener('click', onCloseLightbox);
-    closeBtn.addEventListener('click', onCloseLightbox);
-    imgModul.src = el.dataset.source;
-    imgModul.alt = el.alt;
+    closeModalBtn.addEventListener('click', onCloseLightbox);
+    necessaryImg.src = el.dataset.source;
+    necessaryImg.alt = el.alt;
 
 };
 
 function onCloseLightbox() {
 
-    closeBtn.removeEventListener('click', onCloseLightbox);
-    lightbox.classList.remove('is-open');
+    closeModalBtn.removeEventListener('click', onCloseLightbox);
+    lightboxOverlay.classList.remove('is-open');
     window.removeEventListener('keydown', onEscPress);
 
     onClearSrc();
@@ -74,6 +74,26 @@ function onEscPress(ev) {
 }
 
 function onClearSrc() {
-    imgModul.src = '';
-    imgModul.alt = '';
+    necessaryImg.src = '';
+    necessaryImg.alt = '';
 }
+const imagesSrc = [];
+
+document.addEventListener('keydown', (ev) => {
+    let newIndex = imagesSrc.indexOf(necessaryImg.src);
+  if (newIndex < 0) {
+    return;
+  }
+  if (ev.code === 'ArrowLeft') {
+    newIndex -= 1;
+    if (newIndex===-1) {
+      newIndex = imagesSrc.length-1;
+    } else if (ev.code === 'ArrowRight') {
+      newIndex += 1;
+      if (newIndex === imagesSrc.length) {
+        newIndex = 0;
+      }
+    }
+  }
+  imgModul.src = imagesSrc[newIndex];
+});
