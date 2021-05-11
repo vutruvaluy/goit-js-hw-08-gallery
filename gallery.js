@@ -1,118 +1,79 @@
-import resources from './gallery-items.js'
 
-// Разбей задание на несколько подзадач:
-// Создание и рендер разметки по массиву данных и предоставленному шаблону.
-// Реализация делегирования на галерее ul.js-gallery и получение url большого изображения. 
-// Проверка на кликанье по Li-шке галереи
-// Открытие модального окна по клику на элементе галереи.
-// Подмена значения атрибута src элемента img.lightbox__image.
-// Закрытие модального окна по клику на кнопку button[data-action="close-lightbox"].
-// Очистка значения атрибута src элемента img.lightbox__image. Это необходимо для того, чтобы при следующем открытии модального окна, пока грузится изображение, мы не видели предыдущее.
-
-// Следующий функционал не обязателен при сдаче задания, но будет хорошей практикой по работе с событиями.
-
-// 1. Закрытие модального окна по клику на div.lightbox__overlay.
-// 2. Закрытие модального окна по нажатию клавиши ESC.
-// 3. Пролистывание изображений галереи в открытом модальном окне клавишами "влево" и "вправо".
-
-const galleryContainer = document.querySelector('.js-gallery');
-const modalLightbox = document.querySelector('.js-lightbox');
-const closeModalBtn = document.querySelector('.lightbox__button');
-const lightboxOverlay = modalLightbox.querySelector('.lightbox__overlay');
-const necessaryImg = modalLightbox.querySelector('.lightbox__image');
-
-const cardsMarkup = createGalleryCardsMarkup(resources);
-galleryContainer.insertAdjacentHTML('beforeend', cardsMarkup);
+  import files from "./gallery-items.js";
+//  1.Создание и рендер разметки по массиву данных и предоставленному шаблону.
+// 2 Реализация делегирования на галерее ul.js-gallery и получение url большого
+// изображения. 
+// 3 Открытие модального окна по клику на элементе галереи.
+// 4 Подмена значения атрибута src элемента img.lightbox**image. 
+// 5 Закрытие модального окна по клику на кнопку button[data-action="close-lightbox"]. Очистка значения атрибута
+// src элемента img.lightbox**image. Это необходимо для того, чтобы при следующем
+// открытии модального окна, пока грузится изображение, мы не видели предыдущее.
+const containerGallery = document.querySelector('.js-gallery');
+const overlay = document.querySelector('.lightbox__overlay');
+const lightbox = document.querySelector('.js-lightbox');
+const closeBtn = document.querySelector('[data-action="close-lightbox"]');
+const imgModul = document.querySelector('.lightbox__image');
 
 
-function createGalleryCardsMarkup(resources) {
-    return resources
-        .map(res => {
-            const { preview, original, description } = res;
-            return `
-            <li class="gallery__item">
-                <a class="gallery__link" href="${original}" onclick="event.preventDefault()" >
-                <img
-                    class="gallery__image"
-                    src="${preview}"
-                    data-source="${original}"
-                    alt="${description}"
-                    data-index="${resources.indexOf(res)}" /> </a>
-            </li>`;
-        }).join('');
+function createMarkUp(files) {
+    return files.map(({ preview, original, description }) => {
+        return `
+    <li class="gallery__item">
+  <a class="gallery__link"
+     href="${original}"
+  >
+    <img
+      class="gallery__image"
+      src="${preview}"
+      data-source="${original}"
+      alt="${description}"
+    />
+  </a>
+</li>`;
+    }).join('');
 };
 
-galleryContainer.addEventListener('click', onGalleryContainerClick);
-let currentSlide = 0;
-let slides = document.querySelectorAll('.gallery__image');
+containerGallery.insertAdjacentHTML('beforeend', createMarkUp(files));
+containerGallery.addEventListener('click', onCreateGalleryClick);
 
-function onGalleryContainerClick(evt) {
-    if (!evt.target.classList.contains('gallery__image')) { return; };
-
-    currentSlide = evt.target;
-    console.log(currentSlide);
-
-    imgAttributesChanging(currentSlide)
-
-     if (!modalLightbox.classList.contains('is-open')) {
-         modalLightbox.classList.add('is-open');
-         window.addEventListener('keydown', onChangingImgKeyPress);
-     }
-    closeModalBtn.addEventListener('click', onCloseModal);
-    lightboxOverlay.addEventListener('click', onCloseModal)
-    window.addEventListener('keydown', onEscKeyPress);
-};
-
-function imgAttributesChanging(currentSlide) {
-    necessaryImg.src = currentSlide.dataset.source;
-    necessaryImg.alt = currentSlide.alt;
-};
-
-function onEscKeyPress(event) {
-    const ESC_KEY_CODE = 'Escape';
-    const isEscKey = event.code === ESC_KEY_CODE;
-    if (isEscKey) { onCloseModal() }
-};
-
-function onCloseModal() {
-    modalLightbox.classList.remove('is-open');
-    lightboxImageSrcCleaning();
-    window.removeEventListener('keydown', onChangingImgKeyPress);
+function onCreateGalleryClick(ev) {
+    if (!ev.target.classList.contains('gallery__image')) {
+        return;
+    }
+    ev.preventDefault();
+    console.log(ev.target);
+    const el = ev.target;
+    const elCurrent = ev.currentTarget;
+    onOpenLightbox(el);
+    window.addEventListener('keydown', onEscPress);
+    console.log(lightbox);
 }
 
-function lightboxImageSrcCleaning() {
-    necessaryImg.src = '';
+function onOpenLightbox(el) {
+    lightbox.classList.add('is-open');
+    overlay.addEventListener('click', onCloseLightbox);
+    closeBtn.addEventListener('click', onCloseLightbox);
+    imgModul.src = el.dataset.source;
+    imgModul.alt = el.alt;
+
 };
 
-function onChangingImgKeyPress(event) {
-    const PREV_IMG_KEY_CODE = 'ArrowLeft';
-    const NEXT_IMG_KEY_CODE = 'ArrowRight';
-    let isPrevImgKey = event.code === PREV_IMG_KEY_CODE;
-    let isNextImgKey = event.code === NEXT_IMG_KEY_CODE;
-    if (isPrevImgKey) {
-        console.log('Pressed ArrowLeft');
-        showPrevImg();
-    } else if (isNextImgKey) {
-        console.log('Pressed ArrowRight');
-        showNextImg();
+function onCloseLightbox() {
+
+    closeBtn.removeEventListener('click', onCloseLightbox);
+    lightbox.classList.remove('is-open');
+    window.removeEventListener('keydown', onEscPress);
+
+    onClearSrc();
+};
+
+function onEscPress(ev) {
+    if (ev.code === 'Escape') {
+        onCloseLightbox();
     }
-};
+}
 
-function showPrevImg() {
-    if (currentSlide.dataset.index > 0) {
-        currentSlide = slides[Number(currentSlide.dataset.index) - 1];
-    } else { currentSlide = slides.length; }
-    necessaryImg.src = currentSlide.dataset.source;
-    necessaryImg.alt = currentSlide.alt;
-    console.log(currentSlide);
-    console.log(`Текущий слайд № ${currentSlide.dataset.index}`);
-};
-function showNextImg() {
-    if (currentSlide.dataset.index < length) {
-        currentSlide = slides[Number(currentSlide.dataset.index) + 1];
-    } else { currentSlide = slides[0]; }
-    necessaryImg.src = currentSlide.dataset.source;
-    necessaryImg.alt = currentSlide.alt;
-    console.log(currentSlide);
-    console.log(`Текущий слайд № ${currentSlide.dataset.index}`);
-};
+function onClearSrc() {
+    imgModul.src = '';
+    imgModul.alt = '';
+}
